@@ -1,0 +1,4 @@
+| Encoder_Model        | HuggingFace_ID                |   Hindi_Raw_R0 |   Fair_Predicted_Metadata_R4 |   Pure_Bilingual_Concepts_R5 | Relative_Gain_over_Raw   | Paired_Grouped_95_CI   |   Matched_English_Reference | Gap_Recovery_Rate   |
+|:---------------------|:------------------------------|---------------:|-----------------------------:|-----------------------------:|:-------------------------|:-----------------------|----------------------------:|:--------------------|
+| multilingual-e5-base | intfloat/multilingual-e5-base |         0.3002 |                       0.3386 |                       0.4473 | +49.0%                   | [+0.106, +0.190]       |                      0.6746 | 39.3%               |
+| bge-m3               | BAAI/bge-m3                   |         0.467  |                       0.4707 |                       0.5679 | +21.6%                   | [+0.037, +0.175]       |                      0.6571 | 53.1%               |
