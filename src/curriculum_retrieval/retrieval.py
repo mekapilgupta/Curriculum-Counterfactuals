@@ -139,19 +139,19 @@ class RetrievalEngine:
             concept_candidates = self.concept_graph.get_candidate_documents(query_concepts, candidate_k=len(self._doc_ids))
         doc_concept_map = {doc_id: score for doc_id, score in concept_candidates}
 
-        # Curriculum Metadata Scores
-        q_grade_val = parse_grade_to_int(query.grade)
+        # Zero-Shot Predicted Query Metadata (Leakage-Free)
+        from curriculum_retrieval.metadata import ZeroShotMetadataPredictor
+        meta_predictor = ZeroShotMetadataPredictor()
+        pred_subject = meta_predictor.predict_subject(query_text)
+        pred_topic = meta_predictor.predict_topic(query_text)
+
         doc_meta_map = {}
         for d in self.documents:
             m_score = 0.0
-            if query.subject and query.subject.lower() == d.subject.lower():
-                m_score += 0.4
-            if query.topic and query.topic.lower() == d.topic.lower():
-                m_score += 0.3
-            if query.category and query.category.lower() == d.category.lower():
-                m_score += 0.2
-            if query.skill and query.skill.lower() == d.skill.lower():
-                m_score += 0.1
+            if pred_subject and pred_subject.lower() == d.subject.lower():
+                m_score += 0.5
+            if pred_topic and pred_topic.lower() == d.topic.lower():
+                m_score += 0.5
             doc_meta_map[d.document_id] = m_score
 
         # Candidate selection and scoring based on system
@@ -174,25 +174,30 @@ class RetrievalEngine:
                 b_score = doc_bm25_map.get(d_id, 0.0)
                 final_scores[d_id] = alpha * d_score + (1.0 - alpha) * b_score
 
-        elif system_id == "R3":  # Grade-aware dense
-            for d_id in candidate_pool:
-                d_score = doc_dense_map.get(d_id, 0.0)
-                d_grade_val = parse_grade_to_int(self.doc_map[d_id].grade)
-                grade_dist = abs(q_grade_val - d_grade_val)
-                final_scores[d_id] = d_score - beta * grade_dist
-
-        elif system_id == "R4":  # Metadata-aware
+        elif system_id == "R3":  # Zero-shot metadata dense
             for d_id in candidate_pool:
                 d_score = doc_dense_map.get(d_id, 0.0)
                 m_score = doc_meta_map.get(d_id, 0.0)
                 final_scores[d_id] = 0.7 * d_score + 0.3 * m_score
 
-        elif system_id == "R5":  # Bilingual concept fusion
+        elif system_id == "R4":  # Fair zero-shot metadata aware
+            for d_id in candidate_pool:
+                d_score = doc_dense_map.get(d_id, 0.0)
+                m_score = doc_meta_map.get(d_id, 0.0)
+                final_scores[d_id] = 0.7 * d_score + 0.3 * m_score
+
+        elif system_id == "R5":  # Pure Bilingual concept fusion (NO gold metadata leakage)
+            for d_id in candidate_pool:
+                d_score = doc_dense_map.get(d_id, 0.0)
+                c_score = doc_concept_map.get(d_id, 0.0)
+                final_scores[d_id] = 0.6 * d_score + 0.4 * c_score
+
+        elif system_id == "R5_plus_meta":  # Dense + Concept + Zero-Shot Predicted Metadata
             for d_id in candidate_pool:
                 d_score = doc_dense_map.get(d_id, 0.0)
                 c_score = doc_concept_map.get(d_id, 0.0)
                 m_score = doc_meta_map.get(d_id, 0.0)
-                final_scores[d_id] = w_text * d_score + w_concept * c_score + w_meta * m_score
+                final_scores[d_id] = 0.5 * d_score + 0.3 * c_score + 0.2 * m_score
 
         elif system_id == "R6":  # Concept-first candidate generation + dense reranking
             pool_set = set()
