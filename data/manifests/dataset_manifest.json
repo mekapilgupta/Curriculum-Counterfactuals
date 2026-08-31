@@ -1,0 +1,15 @@
+{
+  "total_raw_rows": 21208,
+  "usable_rows": 17603,
+  "unique_documents": 254,
+  "unique_queries": 1000,
+  "min_lecture_chars": 100,
+  "min_question_chars": 10,
+  "created_at": "2026-08-31T15:20:56.144713+00:00",
+  "source_dataset": "derek-thomas/ScienceQA",
+  "schema_detected": {
+    "documents_file": "data\\processed\\scienceqa_documents.jsonl",
+    "queries_file": "data\\processed\\scienceqa_queries.jsonl",
+    "duplicate_map_file": "data\\processed\\duplicate_map.jsonl"
+  }
+}
