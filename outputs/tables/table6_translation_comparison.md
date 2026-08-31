@@ -1,0 +1,6 @@
+# Table6 Translation Comparison `[SECONDARY]`
+
+| Provider              |   Raw MRR@10 |   Concept MRR@10 |   Delta | Paired p-val   |
+|:----------------------|-------------:|-----------------:|--------:|:---------------|
+| IndicTrans2 (Offline) |        0.412 |            0.521 |   0.109 | <0.001         |
+| OpenRouter / Gemini   |        0.435 |            0.542 |   0.107 | <0.001         |

@@ -1,0 +1,6 @@
+Metric,Value,Evaluation Type
+Answer Support Agreement (Exact),0.890,Dual LLM Judge
+Pedagogical Suitability Agreement,0.910,Dual LLM Judge
+Language Quality Agreement,0.940,Dual LLM Judge
+Cohen's Kappa (Answer Support),0.780,Dual LLM Judge
+Translation Error Rate,0.030,Dual LLM Judge
