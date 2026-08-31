@@ -52,3 +52,8 @@ outputs/figures/*.pdf
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Secret / Local
+.env
+.secret_annotations/
+temp_annotations/
