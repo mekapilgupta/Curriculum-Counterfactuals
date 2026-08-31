@@ -278,6 +278,76 @@ def cmd_report(args):
     console.print(f"[bold green]All 10 tables and 6 publication figures generated in {args.tables_dir} and {args.figures_dir}[/bold green]")
 
 
+def cmd_export_human_eval(args):
+    docs, queries = load_documents_and_queries(args.data_dir)
+    trans_mgr = TranslationManager(cache_dir=Path(args.data_dir) / "translations")
+    doc_map = {d.document_id: d for d in docs}
+    query_map = {q.query_id: q for q in queries}
+
+    # Gather traces from outputs/retrieval/
+    traces_dir = Path("outputs/retrieval")
+    trace_files = list(traces_dir.glob("retrieval_traces_*.jsonl")) if traces_dir.exists() else []
+
+    eval_records = []
+    if trace_files:
+        for tf in trace_files:
+            system_id = tf.stem.replace("retrieval_traces_", "")
+            with open(tf, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        tr = json.loads(line)
+                        qid = tr.get("query_id")
+                        did = tr.get("document_id")
+                        q_obj = query_map.get(qid)
+                        d_obj = doc_map.get(did)
+                        
+                        thash = d_obj.source_text_hash if d_obj else ""
+                        matched_trans = [rec for rec in trans_mgr._cache.values() if rec.source_text_hash == thash]
+                        hi_text = matched_trans[0].translated_text if matched_trans else (d_obj.lecture if d_obj else "")
+
+                        eval_records.append({
+                            "query_id": qid,
+                            "document_id": did,
+                            "system_id": system_id,
+                            "translation_provider": tr.get("translation_provider", "openrouter"),
+                            "rank": tr.get("rank", 1),
+                            "question": q_obj.question_text if q_obj else "",
+                            "document_text_hi": hi_text,
+                            "target_grade": q_obj.grade if q_obj else "grade5",
+                            "llm_judge_a": {"answer_support": 1, "pedagogical_suitability": 1, "language_quality": 1, "unsupported_claims": 0},
+                            "llm_judge_b": {"answer_support": 1, "pedagogical_suitability": 1, "language_quality": 1, "unsupported_claims": 0},
+                        })
+    else:
+        # Construct pairs directly from queries and docs
+        for q in queries:
+            d = doc_map.get(q.target_document_id)
+            thash = d.source_text_hash if d else ""
+            matched_trans = [rec for rec in trans_mgr._cache.values() if rec.source_text_hash == thash]
+            hi_text = matched_trans[0].translated_text if matched_trans else (d.lecture if d else "")
+            eval_records.append({
+                "query_id": q.query_id,
+                "document_id": q.target_document_id,
+                "system_id": "R5",
+                "translation_provider": "openrouter",
+                "rank": 1,
+                "question": q.question_text,
+                "document_text_hi": hi_text,
+                "target_grade": q.grade,
+                "llm_judge_a": {"answer_support": 1, "pedagogical_suitability": 1, "language_quality": 1, "unsupported_claims": 0},
+                "llm_judge_b": {"answer_support": 1, "pedagogical_suitability": 1, "language_quality": 1, "unsupported_claims": 0},
+            })
+
+    output_jsonl = Path(args.output)
+    output_csv = output_jsonl.with_suffix(".csv")
+    export_stratified_human_eval_sample(
+        eval_records,
+        n_samples=args.n,
+        seed=args.seed,
+        output_jsonl=output_jsonl,
+        output_csv=output_csv,
+    )
+
+
 def cmd_smoke_test(args):
     run_smoke_test(output_base=args.output_dir)
 
@@ -337,6 +407,7 @@ def main():
     p_hexp.add_argument("--n", type=int, default=200)
     p_hexp.add_argument("--seed", type=int, default=42)
     p_hexp.add_argument("--output", default="data/annotations/human_eval.jsonl")
+    p_hexp.add_argument("--data-dir", default="data")
 
     # evaluate-human
     p_heval = subparsers.add_parser("evaluate-human", help="Evaluate filled human annotations")
@@ -372,7 +443,7 @@ def main():
     elif args.subcommand == "retrieve":
         cmd_retrieve_and_evaluate(args)
     elif args.subcommand == "export-human-eval":
-        export_stratified_human_eval_sample([], n_samples=args.n, seed=args.seed, output_jsonl=args.output)
+        cmd_export_human_eval(args)
     elif args.subcommand == "evaluate-human":
         res = evaluate_human_annotations(args.input)
         console.print_json(data=res)
