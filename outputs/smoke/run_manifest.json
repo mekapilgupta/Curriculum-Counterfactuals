@@ -1,0 +1,19 @@
+{
+  "run_id": "run_20260831_151532_656e1be0",
+  "command": "smoke-test",
+  "config_hash": "656e1be0a81dbc24247d423753b588422264a5a6e79f0f9f032b96241d848d2f",
+  "git_commit": null,
+  "timestamp": "2026-08-31T15:15:32.584418",
+  "inputs": {
+    "documents": "synthetic_smoke",
+    "queries": "synthetic_smoke"
+  },
+  "outputs": {
+    "tables": "outputs\\smoke\\tables",
+    "figures": "outputs\\smoke\\figures"
+  },
+  "metrics": {
+    "mrr_r0": 0.1875,
+    "mrr_r5": 0.75
+  }
+}

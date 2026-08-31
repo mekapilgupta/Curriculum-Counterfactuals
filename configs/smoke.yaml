@@ -1,0 +1,80 @@
+seed: 42
+
+data:
+  dataset_name: synthetic
+  dataset_revision: "smoke-v1"
+  max_documents: 10
+  max_queries: 20
+  min_lecture_chars: 50
+  min_question_chars: 10
+  languages:
+    source: en
+    target: hi
+
+split:
+  use_official_split: false
+  fallback_strategy: grouped
+  group_field: lecture_hash
+  train_fraction: 0.60
+  dev_fraction: 0.20
+  test_fraction: 0.20
+
+translation:
+  offline:
+    enabled: true
+    model_name: mock
+    source_language: eng_Latn
+    target_language: hin_Deva
+    batch_size: 4
+    max_length: 256
+  openrouter:
+    enabled: false
+    model_name: mock
+    temperature: 0.0
+    max_tokens: 256
+
+concepts:
+  enabled: true
+  provider: heuristic
+  model_name: mock
+  min_concepts: 2
+  max_concepts: 5
+  batch_size: 4
+
+encoders:
+  - name: mock-encoder
+    query_prefix: "query: "
+    passage_prefix: "passage: "
+    normalize: true
+    batch_size: 8
+    max_length: 128
+
+retrieval:
+  top_k: 10
+  output_k: 5
+  bm25_k1: 1.5
+  bm25_b: 0.75
+  hybrid_alpha: 0.5
+  grade_penalty_beta: 0.1
+  concept_weight: 0.3
+  metadata_weight: 0.2
+  candidate_generation:
+    enabled: true
+    candidate_k: 10
+
+judging:
+  enabled: false
+  model_a: mock
+  model_b: mock
+  temperature: 0.0
+  candidate_count: 5
+
+evaluation:
+  primary_metric: mrr@10
+  bootstrap_replicates: 200
+  bootstrap_group: lecture_hash
+  confidence_level: 0.95
+
+human_eval:
+  sample_size: 10
+  seed: 42

@@ -1,0 +1,33 @@
+{
+  "strategy": "grouped_by_lecture_hash",
+  "seed": 42,
+  "train_ids": [
+    "smoke_q_3_a",
+    "smoke_q_3_b",
+    "smoke_q_4_a",
+    "smoke_q_4_b",
+    "smoke_q_6_a",
+    "smoke_q_6_b",
+    "smoke_q_7_a",
+    "smoke_q_7_b",
+    "smoke_q_8_a",
+    "smoke_q_8_b",
+    "smoke_q_9_a",
+    "smoke_q_9_b"
+  ],
+  "dev_ids": [
+    "smoke_q_5_a",
+    "smoke_q_5_b",
+    "smoke_q_10_a",
+    "smoke_q_10_b"
+  ],
+  "test_ids": [
+    "smoke_q_1_a",
+    "smoke_q_1_b",
+    "smoke_q_2_a",
+    "smoke_q_2_b"
+  ],
+  "grouping_field": "target_document_id",
+  "created_at": "2026-08-31T15:15:29.980683+00:00",
+  "dataset_revision": null
+}

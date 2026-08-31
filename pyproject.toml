@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "curriculum-retrieval"
+version = "0.1.0"
+description = "Reproducible Research Pipeline for Multilingual Educational Retrieval with Bilingual Concepts"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "transformers",
+    "sentence-transformers",
+    "datasets",
+    "rank-bm25",
+    "pydantic>=2.0",
+    "pyyaml",
+    "orjson",
+    "httpx",
+    "tenacity",
+    "scikit-learn",
+    "scipy",
+    "statsmodels",
+    "matplotlib",
+    "seaborn",
+    "pandas",
+    "numpy",
+    "tqdm",
+    "rich",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff",
+]
+
+[project.scripts]
+curriculum-retrieval = "curriculum_retrieval.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

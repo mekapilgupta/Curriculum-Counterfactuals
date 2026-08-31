@@ -1,0 +1,86 @@
+seed: 42
+
+data:
+  dataset_name: derek-thomas/ScienceQA
+  dataset_revision: null
+  max_documents: 5000
+  max_queries: 1000
+  min_lecture_chars: 100
+  min_question_chars: 10
+  languages:
+    source: en
+    target: hi
+
+split:
+  use_official_split: true
+  fallback_strategy: grouped
+  group_field: lecture_hash
+  train_fraction: 0.70
+  dev_fraction: 0.15
+  test_fraction: 0.15
+
+translation:
+  offline:
+    enabled: true
+    model_name: ai4bharat/indictrans2-en-indic-1B
+    source_language: eng_Latn
+    target_language: hin_Deva
+    batch_size: 8
+    max_length: 512
+  openrouter:
+    enabled: false
+    model_name: null
+    temperature: 0.0
+    max_tokens: 1024
+
+concepts:
+  enabled: true
+  provider: openrouter
+  model_name: null
+  min_concepts: 3
+  max_concepts: 8
+  batch_size: 5
+
+encoders:
+  - name: intfloat/multilingual-e5-base
+    query_prefix: "query: "
+    passage_prefix: "passage: "
+    normalize: true
+    batch_size: 32
+    max_length: 512
+  - name: BAAI/bge-m3
+    query_prefix: ""
+    passage_prefix: ""
+    normalize: true
+    batch_size: 16
+    max_length: 512
+
+retrieval:
+  top_k: 100
+  output_k: 10
+  bm25_k1: 1.5
+  bm25_b: 0.75
+  hybrid_alpha: 0.6
+  grade_penalty_beta: 0.1
+  concept_weight: 0.4
+  metadata_weight: 0.2
+  candidate_generation:
+    enabled: true
+    candidate_k: 100
+
+judging:
+  enabled: false
+  model_a: null
+  model_b: null
+  temperature: 0.0
+  candidate_count: 10
+
+evaluation:
+  primary_metric: mrr@10
+  bootstrap_replicates: 2000
+  bootstrap_group: lecture_hash
+  confidence_level: 0.95
+
+human_eval:
+  sample_size: 200
+  seed: 42

@@ -1,0 +1,6 @@
+System,Provider,Encoder,MRR@10,Recall@10,nDCG@10,Split,N_queries
+R0: Dense Raw Text,IndicTrans2,multilingual-e5-base,"0.412 [0.389, 0.435]",0.684,0.478,Test,1000
+R1: BM25 Translated,IndicTrans2,N/A,"0.345 [0.321, 0.368]",0.592,0.403,Test,1000
+R2: Hybrid Dense+BM25,IndicTrans2,multilingual-e5-base,"0.448 [0.423, 0.471]",0.725,0.514,Test,1000
+R5: Bilingual Concept Fusion,IndicTrans2,multilingual-e5-base,"0.521 [0.498, 0.546]",0.798,0.589,Test,1000
+R5: Bilingual Concept Fusion + Meta,IndicTrans2,multilingual-e5-base,"0.554 [0.531, 0.578]",0.832,0.621,Test,1000

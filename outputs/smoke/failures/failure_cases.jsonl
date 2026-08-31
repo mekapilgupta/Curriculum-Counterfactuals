@@ -1,0 +1,1 @@
+{"query_id": "smoke_q_2_b", "target_document_id": "smoke_doc_02", "question": "What are the main scientific principles behind forces and motion?", "failure_category": "7. Correct document missing from concept candidate pool", "ranks": {"raw": 999, "concept": 999, "bm25": 999, "dense": 999, "grade": 999}}
