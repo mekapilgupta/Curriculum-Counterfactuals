@@ -1,0 +1,10 @@
+{
+  "mrr_en_raw_reference": 0.6517,
+  "mrr_en_bilingual_reference": 0.6746,
+  "mrr_hi_raw_baseline": 0.3002,
+  "mrr_hi_bilingual_r5": 0.4473,
+  "raw_translation_gap": 0.3515,
+  "matched_bilingual_gap": 0.3744,
+  "recovery_pct_vs_raw_reference": 41.85,
+  "recovery_pct_vs_matched_bilingual": 39.28
+}

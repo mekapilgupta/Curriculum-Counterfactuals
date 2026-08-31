@@ -1,0 +1,18 @@
+| Condition_ID                     | Evaluation_Condition                                     |   Source_Doc_Recovery_MRR10 | Rel_Diff_vs_Hindi_Raw   | Grouped_95_CI    |   Bootstrap_P_Value |
+|:---------------------------------|:---------------------------------------------------------|----------------------------:|:------------------------|:-----------------|--------------------:|
+| 1a_en_raw                        | 1. English Raw Text (Monolingual Reference)              |                      0.6517 | N/A                     | [+0.290, +0.411] |              0.0005 |
+| 1b_en_plus_en_concepts           | 2. English Text + English Concepts (Reference)           |                      0.6646 | N/A                     | [+0.299, +0.432] |              0.0005 |
+| 1c_en_plus_bi_concepts           | 3. English Text + Bilingual Concepts (Matched Reference) |                      0.6746 | N/A                     | [+0.309, +0.440] |              0.0005 |
+| 2a_hi_raw_r0                     | 4. Hindi Raw Text Baseline (R0)                          |                      0.3002 | +0.0%                   | [0.000, 0.000]   |              1      |
+| 2b_hi_plus_en_concepts           | 5. Hindi Text + English Concepts (Ablation)              |                      0.4537 | +51.1%                  | [+0.107, +0.202] |              0.0005 |
+| 2c_hi_plus_hi_concepts           | 6. Hindi Text + Hindi Concepts (Source Derived)          |                      0.4375 | +45.7%                  | [+0.099, +0.178] |              0.0005 |
+| 2d_hi_plus_hi_derived_concepts   | 7. Hindi Text + Hindi Concepts (Strictly Hindi Derived)  |                      0.2974 | -0.9%                   | [-0.011, +0.004] |              0.502  |
+| 2e_hi_plus_bilingual_concepts_r5 | 8. Hindi Text + Bilingual Concepts (R5 Full Proposal)    |                      0.4473 | +49.0%                  | [+0.106, +0.190] |              0.0005 |
+| 3a_ctrl_same_topic_distractor    | 9. Control: Same-Topic Distractor Concepts               |                      0.2216 | -26.2%                  | [-0.127, -0.022] |              0.013  |
+| 3b_ctrl_freq_matched_random      | 10. Control: Frequency-Matched Random Concepts           |                      0.22   | -26.7%                  | [-0.104, -0.057] |              0.0005 |
+| 3c_ctrl_generic_metadata_tags    | 11. Control: Equal-Length Generic Metadata               |                      0.5956 | +98.4%                  | [+0.245, +0.345] |              0.0005 |
+| 3d_ctrl_no_aliases_or_spans      | 12. Control: Concepts without Aliases/Spans              |                      0.4473 | +49.0%                  | [+0.106, +0.190] |              0.0005 |
+| 3e_ctrl_shuffled_null            | 13. Control: Shuffled Concepts Null                      |                      0.2811 | -6.4%                   | [-0.026, -0.013] |              0.0005 |
+| 4a_bm25_naive_en_query           | 14. Lexical: Naive BM25 (English Query -> Hindi Text)    |                      0.0331 | -89.0%                  | [-0.327, -0.209] |              0.0005 |
+| 4b_bm25_fair_hi_query            | 15. Lexical: Fair BM25 (Hindi Query -> Hindi Text)       |                      0.3094 | +3.0%                   | [-0.068, +0.080] |              0.846  |
+| 4c_bm25_hi_query_plus_concepts   | 16. Lexical: BM25 (Hindi Query + Hindi Concepts)         |                      0.3094 | +3.0%                   | [-0.068, +0.080] |              0.846  |
