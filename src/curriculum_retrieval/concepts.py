@@ -272,7 +272,7 @@ class ConceptManager:
         with self._lock:
             self._doc_cache[doc.document_id] = record
             with open(self.doc_cache_file, "a", encoding="utf-8") as f:
-                f.write(json.dumps(record.model_dump()) + "\n")
+                f.write(json.dumps(record.model_dump(), ensure_ascii=False) + "\n")
         return record
 
     def get_or_generate_query_concepts(
@@ -296,7 +296,7 @@ class ConceptManager:
         with self._lock:
             self._query_cache[query.query_id] = record
             with open(self.query_cache_file, "a", encoding="utf-8") as f:
-                f.write(json.dumps(record.model_dump()) + "\n")
+                f.write(json.dumps(record.model_dump(), ensure_ascii=False) + "\n")
         return record
 
     def generate_all_doc_concepts_parallel(

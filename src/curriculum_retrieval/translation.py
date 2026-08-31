@@ -298,7 +298,7 @@ class TranslationManager:
             key = f"{record.source_text_hash}_{record.translation_provider}_{record.translation_model}"
             self._cache[key] = record
             with open(self.cache_file, "a", encoding="utf-8") as f:
-                f.write(json.dumps(record.model_dump()) + "\n")
+                f.write(json.dumps(record.model_dump(), ensure_ascii=False) + "\n")
 
     def get_or_translate(
         self,

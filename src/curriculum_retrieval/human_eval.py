@@ -76,7 +76,7 @@ def export_stratified_human_eval_sample(
     p_jsonl.parent.mkdir(parents=True, exist_ok=True)
     with open(p_jsonl, "w", encoding="utf-8") as f:
         for r in human_records:
-            f.write(json.dumps(r.model_dump()) + "\n")
+            f.write(json.dumps(r.model_dump(), ensure_ascii=False) + "\n")
 
     # Save CSV
     p_csv = Path(output_csv)
@@ -84,8 +84,8 @@ def export_stratified_human_eval_sample(
     csv_rows = []
     for r in human_records:
         row_d = r.model_dump()
-        row_d["llm_judge_a"] = json.dumps(row_d["llm_judge_a"])
-        row_d["llm_judge_b"] = json.dumps(row_d["llm_judge_b"])
+        row_d["llm_judge_a"] = json.dumps(row_d["llm_judge_a"], ensure_ascii=False)
+        row_d["llm_judge_b"] = json.dumps(row_d["llm_judge_b"], ensure_ascii=False)
         csv_rows.append(row_d)
 
     if csv_rows:

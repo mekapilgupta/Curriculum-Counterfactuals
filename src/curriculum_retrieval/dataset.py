@@ -165,17 +165,17 @@ def prepare_scienceqa_data(
     docs_file = processed_dir / "scienceqa_documents.jsonl"
     with open(docs_file, "w", encoding="utf-8") as f:
         for doc in documents:
-            f.write(json.dumps(doc.model_dump()) + "\n")
+            f.write(json.dumps(doc.model_dump(), ensure_ascii=False) + "\n")
 
     queries_file = processed_dir / "scienceqa_queries.jsonl"
     with open(queries_file, "w", encoding="utf-8") as f:
         for q in query_records:
-            f.write(json.dumps(q.model_dump()) + "\n")
+            f.write(json.dumps(q.model_dump(), ensure_ascii=False) + "\n")
 
     dup_file = processed_dir / "duplicate_map.jsonl"
     with open(dup_file, "w", encoding="utf-8") as f:
         for item in duplicate_map:
-            f.write(json.dumps(item) + "\n")
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
     manifest = DatasetManifest(
         total_raw_rows=total_raw_rows,

@@ -137,7 +137,7 @@ class FailureAnalyzer:
         jsonl_path = self.output_dir / "failure_cases.jsonl"
         with open(jsonl_path, "w", encoding="utf-8") as f:
             for item in self.failure_cases:
-                f.write(json.dumps(item) + "\n")
+                f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
         # Aggregate counts
         counts = defaultdict(int)
