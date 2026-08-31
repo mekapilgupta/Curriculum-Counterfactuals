@@ -233,3 +233,27 @@ def validate_data_leakage(
         "total_documents_checked": len(documents),
         "total_queries_checked": len(queries),
     }
+
+
+def load_documents_and_queries(data_dir: str | Path = "data") -> Tuple[List[SourceDocumentRecord], List[QueryRecord]]:
+    """Load processed documents and queries from jsonl files."""
+    d_dir = Path(data_dir)
+    doc_path = d_dir / "processed" / "scienceqa_documents.jsonl"
+    q_path = d_dir / "processed" / "scienceqa_queries.jsonl"
+
+    if not doc_path.exists() or not q_path.exists():
+        raise FileNotFoundError(f"Missing processed data files in {data_dir}/processed")
+
+    docs = []
+    with open(doc_path, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                docs.append(SourceDocumentRecord(**json.loads(line)))
+
+    queries = []
+    with open(q_path, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                queries.append(QueryRecord(**json.loads(line)))
+
+    return docs, queries
