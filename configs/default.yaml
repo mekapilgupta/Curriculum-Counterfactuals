@@ -29,14 +29,14 @@ translation:
     max_length: 512
   openrouter:
     enabled: true
-    model_name: qwen/qwen-2.5-72b-instruct
+    model_name: qwen/qwen3.7-flash
     temperature: 0.0
     max_tokens: 1024
 
 concepts:
   enabled: true
   provider: openrouter
-  model_name: qwen/qwen-2.5-72b-instruct
+  model_name: qwen/qwen3.7-flash
   min_concepts: 3
   max_concepts: 8
   batch_size: 5
@@ -69,9 +69,9 @@ retrieval:
     candidate_k: 100
 
 judging:
-  enabled: false
-  model_a: null
-  model_b: null
+  enabled: true
+  model_a: qwen/qwen3.7-flash
+  model_b: openai/gpt-5.6-luna
   temperature: 0.0
   candidate_count: 10
 
