@@ -140,6 +140,7 @@ def cmd_translate(args):
     config = load_config(args.config)
     docs, queries = load_documents_and_queries(args.data_dir)
     trans_mgr = TranslationManager(cache_dir=Path(args.data_dir) / "translations")
+    workers = getattr(args, "workers", 10)
 
     if args.provider == "offline":
         provider = IndicTrans2TranslationProvider(
@@ -152,18 +153,16 @@ def cmd_translate(args):
     else:
         provider = MockTranslationProvider()
 
-    console.print(f"[bold cyan]Translating documents using {provider.provider_name} ({provider.model_name})...[/bold cyan]")
-    count = 0
-    for doc in docs:
-        trans_mgr.get_or_translate(doc.document_id, doc.lecture, provider)
-        count += 1
-    console.print(f"[bold green]Translated {count} documents successfully.[/bold green]")
+    console.print(f"[bold cyan]Translating documents using {provider.provider_name} ({provider.model_name}) with {workers} workers...[/bold cyan]")
+    trans_results = trans_mgr.translate_documents_parallel(docs, provider, max_workers=workers)
+    console.print(f"[bold green]Translated {len(trans_results)} documents successfully.[/bold green]")
 
 
 def cmd_generate_concepts(args):
     config = load_config(args.config)
     docs, queries = load_documents_and_queries(args.data_dir)
     concept_mgr = ConceptManager(cache_dir=Path(args.data_dir) / "concepts")
+    workers = getattr(args, "workers", 10)
 
     c_cfg = config.get("concepts", {})
     provider_name = args.provider or c_cfg.get("provider", "heuristic")
@@ -172,11 +171,9 @@ def cmd_generate_concepts(args):
     else:
         generator = HeuristicConceptGenerator()
 
-    console.print(f"[bold cyan]Extracting bilingual concepts using {generator.provider_name}...[/bold cyan]")
-    for doc in docs:
-        concept_mgr.get_or_generate_doc_concepts(doc, generator)
-    for q in queries:
-        concept_mgr.get_or_generate_query_concepts(q, generator)
+    console.print(f"[bold cyan]Extracting bilingual concepts using {generator.provider_name} ({generator.model_name}) with {workers} workers...[/bold cyan]")
+    concept_mgr.generate_all_doc_concepts_parallel(docs, generator, max_workers=workers)
+    concept_mgr.generate_all_query_concepts_parallel(queries, generator, max_workers=workers)
     console.print("[bold green]Concept generation and caching complete.[/bold green]")
 
 
@@ -275,12 +272,14 @@ def main():
     # translate
     p_trans = subparsers.add_parser("translate", help="Translate lecture text to Hindi")
     p_trans.add_argument("--provider", choices=["offline", "openrouter", "mock"], default="offline")
+    p_trans.add_argument("--workers", type=int, default=10, help="Number of concurrent worker threads")
     p_trans.add_argument("--config", default="configs/default.yaml")
     p_trans.add_argument("--data-dir", default="data")
 
     # generate-concepts
     p_conc = subparsers.add_parser("generate-concepts", help="Extract bilingual concept metadata")
     p_conc.add_argument("--provider", choices=["openrouter", "heuristic", "mock"], default="heuristic")
+    p_conc.add_argument("--workers", type=int, default=10, help="Number of concurrent worker threads")
     p_conc.add_argument("--config", default="configs/default.yaml")
     p_conc.add_argument("--data-dir", default="data")
 

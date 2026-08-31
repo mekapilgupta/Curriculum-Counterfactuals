@@ -264,8 +264,13 @@ class OpenRouterTranslationProvider(BaseTranslationProvider):
         return results
 
 
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
+
+
 class TranslationManager:
-    """Manages translation caching and disk persistence."""
+    """Manages thread-safe translation caching and parallel disk persistence."""
 
     def __init__(
         self,
@@ -275,6 +280,7 @@ class TranslationManager:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.cache_file = self.cache_dir / "translation_cache.jsonl"
         self._cache: Dict[str, TranslationRecord] = {}
+        self._lock = threading.Lock()
         self._load_cache()
 
     def _load_cache(self):
@@ -288,10 +294,11 @@ class TranslationManager:
                         self._cache[key] = TranslationRecord(**record_dict)
 
     def _save_record(self, record: TranslationRecord):
-        key = f"{record.source_text_hash}_{record.translation_provider}_{record.translation_model}"
-        self._cache[key] = record
-        with open(self.cache_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(record.model_dump()) + "\n")
+        with self._lock:
+            key = f"{record.source_text_hash}_{record.translation_provider}_{record.translation_model}"
+            self._cache[key] = record
+            with open(self.cache_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record.model_dump()) + "\n")
 
     def get_or_translate(
         self,
@@ -303,8 +310,9 @@ class TranslationManager:
         text_hash = compute_text_hash(text)
         key = f"{text_hash}_{provider.provider_name}_{provider.model_name}"
 
-        if key in self._cache:
-            return self._cache[key]
+        with self._lock:
+            if key in self._cache:
+                return self._cache[key]
 
         translated_texts = provider.translate_texts([text])
         trans_text = translated_texts[0]
@@ -325,3 +333,42 @@ class TranslationManager:
         )
         self._save_record(record)
         return record
+
+    def translate_documents_parallel(
+        self,
+        documents: List[Any],
+        provider: BaseTranslationProvider,
+        max_workers: int = 10,
+    ) -> Dict[str, TranslationRecord]:
+        """Translate documents concurrently using a thread pool with live progress bar."""
+        results: Dict[str, TranslationRecord] = {}
+        pending_docs = []
+
+        for doc in documents:
+            thash = compute_text_hash(doc.lecture)
+            key = f"{thash}_{provider.provider_name}_{provider.model_name}"
+            if key in self._cache:
+                results[doc.document_id] = self._cache[key]
+            else:
+                pending_docs.append(doc)
+
+        console.print(f"[bold cyan]Translating {len(pending_docs)} documents ({len(results)} cached) using {max_workers} workers...[/bold cyan]")
+        if not pending_docs:
+            return results
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_doc = {
+                executor.submit(self.get_or_translate, doc.document_id, doc.lecture, provider): doc
+                for doc in pending_docs
+            }
+            with tqdm(total=len(pending_docs), desc="Translating", unit="doc") as pbar:
+                for future in as_completed(future_to_doc):
+                    doc = future_to_doc[future]
+                    try:
+                        rec = future.result()
+                        results[doc.document_id] = rec
+                    except Exception as e:
+                        console.print(f"[bold red]Error translating doc {doc.document_id}:[/bold red] {e}")
+                    pbar.update(1)
+
+        return results

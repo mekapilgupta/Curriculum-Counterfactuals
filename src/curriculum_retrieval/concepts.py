@@ -218,8 +218,13 @@ class OpenRouterConceptGenerator(BaseConceptGenerator):
             return results
 
 
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
+
+
 class ConceptManager:
-    """Manages document and query concept generation and disk caching."""
+    """Manages thread-safe document and query concept generation and parallel disk caching."""
 
     def __init__(self, cache_dir: str | Path = "data/concepts"):
         self.cache_dir = Path(cache_dir)
@@ -228,6 +233,7 @@ class ConceptManager:
         self.query_cache_file = self.cache_dir / "query_concepts.jsonl"
         self._doc_cache: Dict[str, ConceptRecord] = {}
         self._query_cache: Dict[str, QueryConceptRecord] = {}
+        self._lock = threading.Lock()
         self._load_cache()
 
     def _load_cache(self):
@@ -250,8 +256,9 @@ class ConceptManager:
         doc: SourceDocumentRecord,
         generator: BaseConceptGenerator,
     ) -> ConceptRecord:
-        if doc.document_id in self._doc_cache:
-            return self._doc_cache[doc.document_id]
+        with self._lock:
+            if doc.document_id in self._doc_cache:
+                return self._doc_cache[doc.document_id]
 
         concepts = generator.extract_concepts(doc.lecture, is_query=False)
         record = ConceptRecord(
@@ -262,9 +269,10 @@ class ConceptManager:
             generator_model=generator.model_name,
             concepts=concepts,
         )
-        self._doc_cache[doc.document_id] = record
-        with open(self.doc_cache_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(record.model_dump()) + "\n")
+        with self._lock:
+            self._doc_cache[doc.document_id] = record
+            with open(self.doc_cache_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record.model_dump()) + "\n")
         return record
 
     def get_or_generate_query_concepts(
@@ -272,8 +280,9 @@ class ConceptManager:
         query: QueryRecord,
         generator: BaseConceptGenerator,
     ) -> QueryConceptRecord:
-        if query.query_id in self._query_cache:
-            return self._query_cache[query.query_id]
+        with self._lock:
+            if query.query_id in self._query_cache:
+                return self._query_cache[query.query_id]
 
         concepts = generator.extract_concepts(query.question_text, is_query=True)
         record = QueryConceptRecord(
@@ -284,10 +293,81 @@ class ConceptManager:
             generator_model=generator.model_name,
             concepts=concepts,
         )
-        self._query_cache[query.query_id] = record
-        with open(self.query_cache_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(record.model_dump()) + "\n")
+        with self._lock:
+            self._query_cache[query.query_id] = record
+            with open(self.query_cache_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record.model_dump()) + "\n")
         return record
+
+    def generate_all_doc_concepts_parallel(
+        self,
+        documents: List[SourceDocumentRecord],
+        generator: BaseConceptGenerator,
+        max_workers: int = 10,
+    ) -> Dict[str, ConceptRecord]:
+        """Extract concepts for all documents concurrently."""
+        results = {}
+        pending = []
+        for doc in documents:
+            if doc.document_id in self._doc_cache:
+                results[doc.document_id] = self._doc_cache[doc.document_id]
+            else:
+                pending.append(doc)
+
+        console.print(f"[bold cyan]Generating concepts for {len(pending)} docs ({len(results)} cached) with {max_workers} workers...[/bold cyan]")
+        if not pending:
+            return results
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_doc = {
+                executor.submit(self.get_or_generate_doc_concepts, doc, generator): doc
+                for doc in pending
+            }
+            with tqdm(total=len(pending), desc="Doc Concepts", unit="doc") as pbar:
+                for future in as_completed(future_to_doc):
+                    doc = future_to_doc[future]
+                    try:
+                        rec = future.result()
+                        results[doc.document_id] = rec
+                    except Exception as e:
+                        console.print(f"[bold red]Error on doc {doc.document_id}:[/bold red] {e}")
+                    pbar.update(1)
+        return results
+
+    def generate_all_query_concepts_parallel(
+        self,
+        queries: List[QueryRecord],
+        generator: BaseConceptGenerator,
+        max_workers: int = 10,
+    ) -> Dict[str, QueryConceptRecord]:
+        """Extract concepts for all queries concurrently."""
+        results = {}
+        pending = []
+        for q in queries:
+            if q.query_id in self._query_cache:
+                results[q.query_id] = self._query_cache[q.query_id]
+            else:
+                pending.append(q)
+
+        console.print(f"[bold cyan]Generating concepts for {len(pending)} queries ({len(results)} cached) with {max_workers} workers...[/bold cyan]")
+        if not pending:
+            return results
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_q = {
+                executor.submit(self.get_or_generate_query_concepts, q, generator): q
+                for q in pending
+            }
+            with tqdm(total=len(pending), desc="Query Concepts", unit="query") as pbar:
+                for future in as_completed(future_to_q):
+                    q = future_to_q[future]
+                    try:
+                        rec = future.result()
+                        results[q.query_id] = rec
+                    except Exception as e:
+                        console.print(f"[bold red]Error on query {q.query_id}:[/bold red] {e}")
+                    pbar.update(1)
+        return results
 
 
 # Document representation builders (V0 - V4)
