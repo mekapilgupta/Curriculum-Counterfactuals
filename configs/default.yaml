@@ -31,7 +31,7 @@ translation:
     enabled: true
     model_name: qwen/qwen3.7-flash
     temperature: 0.0
-    max_tokens: 1024
+    max_tokens: 8192
 
 concepts:
   enabled: true

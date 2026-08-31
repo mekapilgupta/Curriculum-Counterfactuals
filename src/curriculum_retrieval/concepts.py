@@ -162,10 +162,10 @@ class OpenRouterConceptGenerator(BaseConceptGenerator):
                 {"role": "user", "content": text},
             ],
             "temperature": self.temperature,
-            "response_format": {"type": "json_object"},
+            "max_tokens": 8192,
         }
 
-        with httpx.Client(timeout=30.0) as client:
+        with httpx.Client(timeout=120.0) as client:
             resp = client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
@@ -173,10 +173,29 @@ class OpenRouterConceptGenerator(BaseConceptGenerator):
             )
             resp.raise_for_status()
             data = resp.json()
-            raw_content = data["choices"][0]["message"]["content"]
-            parsed = json.loads(raw_content)
+            message = data["choices"][0]["message"]
+            raw_content = message.get("content") or ""
+            if not raw_content and message.get("reasoning"):
+                raw_content = message.get("reasoning")
+
+            if not raw_content:
+                return HeuristicConceptGenerator().extract_concepts(text, is_query=is_query)
+
+            cleaned = raw_content.strip()
+            if cleaned.startswith("```"):
+                cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
+                cleaned = re.sub(r"\s*```$", "", cleaned)
+
+            try:
+                parsed = json.loads(cleaned)
+            except Exception:
+                # Fallback to heuristic if json parsing fails
+                return HeuristicConceptGenerator().extract_concepts(text, is_query=is_query)
             
-            raw_concepts = parsed.get("concepts", [])
+            raw_concepts = parsed.get("concepts", []) if isinstance(parsed, dict) else []
+            if not raw_concepts:
+                return HeuristicConceptGenerator().extract_concepts(text, is_query=is_query)
+
             results = []
             for item in raw_concepts:
                 label_en = str(item.get("label_en", "")).strip()

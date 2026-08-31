@@ -6,6 +6,7 @@ Supports IndicTrans2 offline, OpenRouter API, and deterministic mock translation
 import abc
 import json
 import os
+import re
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -215,11 +216,10 @@ class OpenRouterTranslationProvider(BaseTranslationProvider):
                 {"role": "user", "content": text},
             ],
             "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
-            "response_format": {"type": "json_object"},
+            "max_tokens": max(self.max_tokens, 8192),
         }
 
-        with httpx.Client(timeout=30.0) as client:
+        with httpx.Client(timeout=120.0) as client:
             resp = client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
@@ -227,9 +227,29 @@ class OpenRouterTranslationProvider(BaseTranslationProvider):
             )
             resp.raise_for_status()
             data = resp.json()
-            raw_content = data["choices"][0]["message"]["content"]
-            parsed = json.loads(raw_content)
-            return parsed.get("translated_text", raw_content)
+            message = data["choices"][0]["message"]
+            raw_content = message.get("content") or ""
+            if not raw_content and message.get("reasoning"):
+                raw_content = message.get("reasoning")
+
+            if not raw_content:
+                return text
+
+            cleaned = raw_content.strip()
+            if cleaned.startswith("```"):
+                cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
+                cleaned = re.sub(r"\s*```$", "", cleaned)
+
+            try:
+                parsed = json.loads(cleaned)
+                if isinstance(parsed, dict) and "translated_text" in parsed:
+                    return str(parsed["translated_text"]).strip()
+                return cleaned
+            except Exception:
+                match = re.search(r'"translated_text"\s*:\s*"([^"]+)"', cleaned)
+                if match:
+                    return match.group(1).strip()
+                return cleaned
 
     def translate_texts(
         self,
