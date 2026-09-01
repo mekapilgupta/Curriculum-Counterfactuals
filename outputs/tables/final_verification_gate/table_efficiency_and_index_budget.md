@@ -1,0 +1,7 @@
+| Index_Representation                      |   Mean_Characters |   Approx_Tokens | Index_Size_Overhead_vs_Raw   |
+|:------------------------------------------|------------------:|----------------:|:-----------------------------|
+| Hindi Only (R0)                           |             771.5 |           220.4 | +0.0%                        |
+| Full English + Hindi (Bi-text)            |            1513.4 |           432.4 | +96.2%                       |
+| Hindi + English-Only Concepts             |             853.2 |           243.8 | +10.6%                       |
+| Hindi + Bilingual Concepts (R5)           |             931.1 |           266   | +20.7%                       |
+| Full English + Hindi + Bilingual Concepts |            1673.1 |           478   | +116.9%                      |

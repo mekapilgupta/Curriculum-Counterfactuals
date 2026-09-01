@@ -1,0 +1,5 @@
+Encoder,Translation_Engine,1_Hindi_Raw_R0,2_Hindi_plus_EN_Concepts,3_Hindi_plus_Bilingual_Concepts_R5,4_Hindi_plus_Full_English_Lecture,5_Full_English_plus_Bilingual_Concepts,Concept_Recovery_of_Full_English
+multilingual-e5-base,qwen,0.3002,0.4537,0.4473,0.5468,0.6128,59.6%
+multilingual-e5-base,gemini,0.4338,0.5431,0.5442,0.5579,0.6031,89.0%
+bge-m3,qwen,0.4921,0.5733,0.5756,0.5618,0.6125,119.7%
+bge-m3,gemini,0.4921,0.5733,0.5756,0.5618,0.6125,119.7%

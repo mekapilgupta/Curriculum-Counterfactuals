@@ -1,0 +1,10 @@
+| Condition_Key                   | Condition_Description                        | Translation_Source   | Encoder              |   MRR_at_10 | Relative_Gain_vs_Raw   | Paired_95_CI     |   P_Value |
+|:--------------------------------|:---------------------------------------------|:---------------------|:---------------------|------------:|:-----------------------|:-----------------|----------:|
+| A_hi_only                       | A. Hindi Translated Lecture Only (R0)        | qwen                 | multilingual-e5-base |      0.3002 | +0.0%                  | [0.000, 0.000]   |    1      |
+| B_hi_plus_full_en               | B. Hindi + Full Original English Lecture     | qwen                 | multilingual-e5-base |      0.5468 | +82.1%                 | [+0.184, +0.307] |    0.0005 |
+| C_hi_plus_concepts              | C. Hindi + Bilingual Concepts (R5-Pure)      | qwen                 | multilingual-e5-base |      0.4473 | +49.0%                 | [+0.106, +0.190] |    0.0005 |
+| D_hi_plus_full_en_plus_concepts | D. Hindi + Full English + Bilingual Concepts | qwen                 | multilingual-e5-base |      0.6128 | +104.1%                | [+0.248, +0.376] |    0.0005 |
+| A_hi_only                       | A. Hindi Translated Lecture Only (R0)        | gemini               | multilingual-e5-base |      0.4338 | +0.0%                  | [0.000, 0.000]   |    1      |
+| B_hi_plus_full_en               | B. Hindi + Full Original English Lecture     | gemini               | multilingual-e5-base |      0.5579 | +28.6%                 | [+0.049, +0.195] |    0.003  |
+| C_hi_plus_concepts              | C. Hindi + Bilingual Concepts (R5-Pure)      | gemini               | multilingual-e5-base |      0.5442 | +25.5%                 | [+0.065, +0.161] |    0.0005 |
+| D_hi_plus_full_en_plus_concepts | D. Hindi + Full English + Bilingual Concepts | gemini               | multilingual-e5-base |      0.6031 | +39.0%                 | [+0.103, +0.235] |    0.0005 |

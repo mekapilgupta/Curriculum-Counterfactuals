@@ -1,0 +1,10 @@
+Condition_Key,Evaluation_Condition,MRR_at_10,Rel_Diff_vs_Raw,Grouped_95_CI,P_Value
+1a_en_raw_reference,1. English Raw Text (Monolingual Reference),0.6517,N/A,"[+0.153, +0.283]",0.0005
+1b_en_matched_bilingual,2. English Text + Bilingual Concepts (Matched Reference),0.6746,N/A,"[+0.177, +0.309]",0.0005
+2a_hi_raw_r0,3. Hindi Raw Text Baseline (R0),0.4338,+0.0%,"[0.000, 0.000]",1.0000
+2b_hi_fair_predicted_metadata,4. Fair Zero-Shot Predicted Metadata Baseline (R4-Fair),0.4877,+12.4%,"[+0.026, +0.088]",0.0005
+2c_hi_pure_bilingual_concepts_r5,"5. Pure Bilingual Concepts Fusion (R5-Pure, Leakage-Free)",0.5442,+25.5%,"[+0.065, +0.161]",0.0005
+2d_hi_concepts_plus_fair_meta,6. Bilingual Concepts + Fair Predicted Metadata (R5+Meta),0.5669,+30.7%,"[+0.086, +0.184]",0.0005
+2e_hi_gold_leaked_metadata_oracle,7. [ORACLE] Gold Leaked Metadata (ScienceQA Row Tags),0.7115,+64.0%,"[+0.224, +0.332]",0.0005
+2f_hi_original_leaked_r5,8. [LEAKED R5] Original Concepts + Leaked Gold Metadata,0.7225,+66.5%,"[+0.228, +0.350]",0.0005
+3_bm25_fair_hi_query,9. Fair Lexical BM25 (Hindi Query -> Hindi Doc),0.352,-18.9%,"[-0.180, +0.018]",0.0950
